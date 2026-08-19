@@ -1,0 +1,10 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "next build",
+  "devCommand": "next dev",
+  "installCommand": "npm install",
+  "env": {
+    "NEXT_PUBLIC_API_URL": "https://eventix-backend-production.up.railway.app/api/v1",
+    "NEXT_PUBLIC_BASE_URL": "https://eventix-backend-production.up.railway.app"
+  }
+}
