@@ -35,7 +35,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch {
       // If error or unauthorized, retain cached user or clear if needed
       const cachedUser = localStorage.getItem('user');
-      if (cachedUser) {
+      if (cachedUser && cachedUser !== 'null' && cachedUser !== 'undefined') {
         try {
           setUser(JSON.parse(cachedUser));
         } catch {
@@ -53,7 +53,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (savedToken) {
       setToken(savedToken);
-      if (savedUser) {
+      if (savedUser && savedUser !== 'null' && savedUser !== 'undefined') {
         try {
           setUser(JSON.parse(savedUser));
         } catch {
@@ -74,13 +74,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('user', JSON.stringify(data.user));
   };
 
-  const logout = () => {
-    setToken(null);
-    setUser(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('user');
-    window.location.href = '/';
+  const logout = async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch {
+      // ignore
+    } finally {
+      setToken(null);
+      setUser(null);
+      localStorage.removeItem('token');
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('user');
+      window.location.href = '/';
+    }
   };
 
   return (
@@ -89,6 +95,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     </AuthContext.Provider>
   );
 };
+
+export default AuthProvider;
 
 export const useAuth = () => {
   const context = useContext(AuthContext);

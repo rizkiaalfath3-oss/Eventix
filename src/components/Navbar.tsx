@@ -6,15 +6,19 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { 
   Ticket, 
-  Compass, 
+  Sparkles, 
+  HelpCircle, 
+  Smartphone, 
+  ChevronDown, 
+  User as UserIcon, 
   LayoutDashboard, 
   ShieldCheck, 
-  User as UserIcon, 
   LogOut, 
   Menu, 
   X, 
-  Sparkles,
-  PlusCircle
+  Flame,
+  Music2,
+  CheckCircle2
 } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
@@ -26,273 +30,351 @@ export const Navbar: React.FC = () => {
   const isActive = (path: string) => pathname === path;
 
   return (
-    <nav className="sticky top-0 z-50 w-full glass-panel border-b border-surface-border backdrop-blur-md">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
-          
-          {/* Brand Logo */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 p-[2px] shadow-glow transition-transform duration-300 group-hover:scale-105">
-              <div className="w-full h-full bg-[#0B0F19] rounded-[10px] flex items-center justify-center">
-                <Ticket className="w-6 h-6 text-indigo-400 group-hover:text-purple-300 transition-colors" />
-              </div>
+    <header className="sticky top-0 z-50 w-full bg-white shadow-sm transition-all">
+      {/* 1. Top Mini Utility Bar */}
+      <div className="hidden lg:block bg-traveloka-navy text-white text-xs border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-1.5 text-slate-300 hover:text-white transition-colors cursor-pointer">
+              <Smartphone className="w-3.5 h-3.5 text-traveloka-blue" />
+              <span>Download Eventix App</span>
             </div>
-            <div className="flex flex-col">
-              <span className="text-2xl font-black tracking-tight text-white flex items-center gap-1.5">
-                EVENT<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">IX</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-pink-500 animate-pulse"></span>
-              </span>
-              <span className="text-[10px] text-gray-400 tracking-wider uppercase font-medium">Concert Platform</span>
+            <div className="flex items-center gap-1.5 text-slate-300 hover:text-white transition-colors cursor-pointer">
+              <HelpCircle className="w-3.5 h-3.5 text-traveloka-yellow" />
+              <span>Pusat Bantuan 24/7</span>
             </div>
-          </Link>
-
-          {/* Desktop Navigation Links */}
-          <div className="hidden md:flex items-center gap-1">
-            <Link
-              href="/"
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                isActive('/') 
-                  ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30' 
-                  : 'text-gray-300 hover:text-white hover:bg-surface-hover'
-              }`}
-            >
-              <Compass className="w-4 h-4" />
-              Jelajahi Konser
-            </Link>
-
-            {user && (
-              <Link
-                href="/my-tickets"
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  isActive('/my-tickets') 
-                    ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30' 
-                    : 'text-gray-300 hover:text-white hover:bg-surface-hover'
-                }`}
+            {(!user || user.role === 'USER') && (
+              <Link 
+                href="/auth/register" 
+                className="text-amber-300 font-semibold hover:text-amber-200 transition-colors flex items-center gap-1"
               >
-                <Ticket className="w-4 h-4" />
-                Tiket Saya
-              </Link>
-            )}
-
-            {user && (user.role === 'ORGANIZER' || user.role === 'ADMIN') && (
-              <Link
-                href="/dashboard/organizer"
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  isActive('/dashboard/organizer') 
-                    ? 'bg-purple-600/20 text-purple-300 border border-purple-500/30' 
-                    : 'text-gray-300 hover:text-white hover:bg-surface-hover'
-                }`}
-              >
-                <LayoutDashboard className="w-4 h-4" />
-                Dashboard Organizer
-              </Link>
-            )}
-
-            {user && user.role === 'ADMIN' && (
-              <Link
-                href="/dashboard/admin"
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  isActive('/dashboard/admin') 
-                    ? 'bg-pink-600/20 text-pink-300 border border-pink-500/30' 
-                    : 'text-gray-300 hover:text-white hover:bg-surface-hover'
-                }`}
-              >
-                <ShieldCheck className="w-4 h-4 text-pink-400" />
-                Admin Panel
+                <Sparkles className="w-3 h-3" />
+                <span>Jadi Mitra Organizer & Jual Tiket</span>
               </Link>
             )}
           </div>
 
-          {/* Desktop Right Auth Section */}
-          <div className="hidden md:flex items-center gap-3">
-            {token && user ? (
-              <div className="relative">
-                <button
-                  onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="flex items-center gap-3 p-1.5 pr-3 rounded-full bg-surface-card border border-surface-border hover:border-indigo-500/40 transition-all text-left"
-                >
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white text-xs font-bold ring-2 ring-indigo-500/20">
-                    {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-xs font-semibold text-gray-200 line-clamp-1 max-w-[120px]">{user.name}</span>
-                    <span className="text-[10px] text-indigo-400 uppercase tracking-wider font-semibold">
-                      {user.role}
-                    </span>
-                  </div>
-                </button>
-
-                {/* Dropdown Menu */}
-                {dropdownOpen && (
-                  <div 
-                    className="absolute right-0 mt-2 w-56 rounded-2xl bg-[#111827] border border-surface-border shadow-2xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200"
-                    onMouseLeave={() => setDropdownOpen(false)}
-                  >
-                    <div className="px-4 py-2.5 border-b border-surface-border">
-                      <p className="text-xs text-gray-400">Masuk sebagai</p>
-                      <p className="text-sm font-semibold text-white truncate">{user.email}</p>
-                      <span className="inline-block mt-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-indigo-900/60 text-indigo-300 border border-indigo-700/50">
-                        {user.role} {user.isVerified ? '✓ Terverifikasi' : ''}
-                      </span>
-                    </div>
-
-                    <div className="py-1">
-                      <Link
-                        href="/my-tickets"
-                        onClick={() => setDropdownOpen(false)}
-                        className="flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-gray-300 hover:text-white hover:bg-surface-hover"
-                      >
-                        <Ticket className="w-4 h-4 text-indigo-400" />
-                        Tiket Saya
-                      </Link>
-
-                      {(user.role === 'ORGANIZER' || user.role === 'ADMIN') && (
-                        <Link
-                          href="/dashboard/organizer"
-                          onClick={() => setDropdownOpen(false)}
-                          className="flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-gray-300 hover:text-white hover:bg-surface-hover"
-                        >
-                          <LayoutDashboard className="w-4 h-4 text-purple-400" />
-                          Dashboard Organizer
-                        </Link>
-                      )}
-
-                      {user.role === 'ADMIN' && (
-                        <Link
-                          href="/dashboard/admin"
-                          onClick={() => setDropdownOpen(false)}
-                          className="flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-gray-300 hover:text-white hover:bg-surface-hover"
-                        >
-                          <ShieldCheck className="w-4 h-4 text-pink-400" />
-                          Platform Admin
-                        </Link>
-                      )}
-                    </div>
-
-                    <div className="border-t border-surface-border pt-1">
-                      <button
-                        onClick={() => {
-                          setDropdownOpen(false);
-                          logout();
-                        }}
-                        className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-red-400 hover:text-red-300 hover:bg-red-950/30"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        Keluar Akun
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Link
-                  href="/auth/login"
-                  className="px-4 py-2 rounded-xl text-sm font-medium text-gray-300 hover:text-white hover:bg-surface-card transition-all"
-                >
-                  Masuk
-                </Link>
-                <Link
-                  href="/auth/register"
-                  className="relative group overflow-hidden px-5 py-2 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:shadow-glow transition-all active:scale-95"
-                >
-                  <span className="relative z-10 flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4" />
-                    Daftar Sekarang
-                  </span>
-                </Link>
-              </div>
-            )}
-          </div>
-
-          {/* Mobile menu button */}
-          <div className="flex md:hidden items-center">
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-surface-card"
-            >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
+          <div className="flex items-center gap-4 text-slate-300">
+            <div className="flex items-center gap-1.5 text-emerald-400 text-xs font-semibold">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>100% Garansi Tiket Resmi & Transaksi Aman</span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Mobile Drawer */}
+      {/* 2. Main Navigation Bar */}
+      <div className="bg-white border-b border-slate-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-20">
+            
+            {/* Left: Brand Logo */}
+            <div className="flex items-center gap-8">
+              <Link href="/" className="flex items-center gap-2.5 group">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-traveloka-blue to-sky-400 flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform">
+                  <Ticket className="w-5 h-5 -rotate-12" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-2xl font-black tracking-tight text-traveloka-navy flex items-center">
+                    event<span className="text-traveloka-blue">ix</span>
+                  </span>
+                  <span className="text-[10px] font-semibold tracking-wider text-slate-400 uppercase -mt-1">
+                    Concert & Xperience
+                  </span>
+                </div>
+              </Link>
+
+              {/* Desktop Nav Links - Strict Separation Per Role */}
+              <nav className="hidden md:flex items-center gap-1">
+                <Link
+                  href="/"
+                  className={`px-4 py-2 rounded-full text-sm font-semibold transition-all flex items-center gap-2 ${
+                    isActive('/')
+                      ? 'bg-traveloka-sky text-traveloka-blue font-bold'
+                      : 'text-slate-600 hover:text-traveloka-blue hover:bg-slate-50'
+                  }`}
+                >
+                  <Music2 className="w-4 h-4" />
+                  <span>Jelajahi Konser</span>
+                </Link>
+
+                {/* USER ONLY: Tiket Saya */}
+                {user && user.role === 'USER' && (
+                  <Link
+                    href="/my-tickets"
+                    className={`px-4 py-2 rounded-full text-sm font-semibold transition-all flex items-center gap-2 ${
+                      isActive('/my-tickets')
+                        ? 'bg-traveloka-sky text-traveloka-blue font-bold'
+                        : 'text-slate-600 hover:text-traveloka-blue hover:bg-slate-50'
+                    }`}
+                  >
+                    <Ticket className="w-4 h-4" />
+                    <span>Tiket Saya</span>
+                  </Link>
+                )}
+
+                {/* ORGANIZER ONLY: Mitra Organizer Dashboard */}
+                {user && user.role === 'ORGANIZER' && (
+                  <Link
+                    href="/dashboard/organizer"
+                    className={`px-4 py-2 rounded-full text-sm font-semibold transition-all flex items-center gap-2 ${
+                      isActive('/dashboard/organizer')
+                        ? 'bg-traveloka-navy text-white font-bold'
+                        : 'text-slate-600 hover:text-traveloka-navy hover:bg-slate-100'
+                    }`}
+                  >
+                    <LayoutDashboard className="w-4 h-4 text-traveloka-blue" />
+                    <span>Dashboard Mitra Organizer</span>
+                  </Link>
+                )}
+
+                {/* ADMIN ONLY: Admin Portal */}
+                {user && user.role === 'ADMIN' && (
+                  <Link
+                    href="/dashboard/admin"
+                    className={`px-4 py-2 rounded-full text-sm font-bold transition-all flex items-center gap-1.5 ${
+                      isActive('/dashboard/admin')
+                        ? 'bg-red-600 text-white shadow-sm'
+                        : 'bg-red-50 text-red-600 hover:bg-red-100'
+                    }`}
+                  >
+                    <ShieldCheck className="w-4 h-4" />
+                    <span>Admin Portal</span>
+                  </Link>
+                )}
+              </nav>
+            </div>
+
+            {/* Right: Auth & User Actions */}
+            <div className="hidden md:flex items-center gap-3">
+              {token && user ? (
+                <div className="relative">
+                  <button
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                    className="flex items-center gap-2.5 px-3.5 py-2 rounded-full border border-slate-200 bg-white hover:border-traveloka-blue hover:bg-traveloka-sky/30 transition-all text-slate-800 font-semibold text-sm shadow-sm"
+                  >
+                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-traveloka-blue to-traveloka-navy text-white flex items-center justify-center text-xs font-bold shadow-sm">
+                      {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                    </div>
+                    <span className="max-w-[130px] truncate text-slate-800 font-bold">{user.name}</span>
+                    <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${
+                      user.role === 'ADMIN' 
+                        ? 'bg-red-100 text-red-700' 
+                        : user.role === 'ORGANIZER' 
+                        ? 'bg-purple-100 text-purple-700' 
+                        : 'bg-traveloka-sky text-traveloka-blue'
+                    }`}>
+                      {user.role}
+                    </span>
+                    <ChevronDown className="w-4 h-4 text-slate-400" />
+                  </button>
+
+                  {/* Dropdown Menu - Strict Per Role */}
+                  {dropdownOpen && (
+                    <div 
+                      className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-floating border border-slate-100 p-2.5 z-50 animate-in fade-in zoom-in-95 duration-150"
+                      onMouseLeave={() => setDropdownOpen(false)}
+                    >
+                      <div className="p-3 bg-gradient-to-r from-traveloka-sky/50 to-white rounded-xl mb-2">
+                        <p className="text-xs text-slate-500 font-medium">Akun Masuk</p>
+                        <p className="text-sm font-bold text-slate-900 truncate">{user.name}</p>
+                        <p className="text-xs text-slate-500 truncate">{user.email}</p>
+                        <div className="mt-1.5 flex items-center gap-1.5">
+                          <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-md border ${
+                            user.role === 'ADMIN'
+                              ? 'text-red-700 bg-red-50 border-red-200'
+                              : user.role === 'ORGANIZER'
+                              ? 'text-purple-700 bg-purple-50 border-purple-200'
+                              : 'text-traveloka-blue bg-white border-traveloka-blue/20'
+                          }`}>
+                            Role: {user.role}
+                          </span>
+                          {user.isVerified && (
+                            <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md flex items-center gap-1">
+                              <CheckCircle2 className="w-3 h-3" /> Terverifikasi
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        {/* USER ONLY: Tiket & Pesanan Saya */}
+                        {user.role === 'USER' && (
+                          <Link
+                            href="/my-tickets"
+                            onClick={() => setDropdownOpen(false)}
+                            className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-traveloka-sky hover:text-traveloka-blue transition-colors"
+                          >
+                            <Ticket className="w-4 h-4 text-traveloka-blue" />
+                            <span>Tiket & Pesanan Saya</span>
+                          </Link>
+                        )}
+
+                        {/* ORGANIZER ONLY: Dashboard Mitra Organizer */}
+                        {user.role === 'ORGANIZER' && (
+                          <Link
+                            href="/dashboard/organizer"
+                            onClick={() => setDropdownOpen(false)}
+                            className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-purple-50 hover:text-purple-700 transition-colors"
+                          >
+                            <LayoutDashboard className="w-4 h-4 text-purple-600" />
+                            <span>Dashboard Mitra Organizer</span>
+                          </Link>
+                        )}
+
+                        {/* ADMIN ONLY: Admin Portal */}
+                        {user.role === 'ADMIN' && (
+                          <Link
+                            href="/dashboard/admin"
+                            onClick={() => setDropdownOpen(false)}
+                            className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-red-50 hover:text-red-600 transition-colors"
+                          >
+                            <ShieldCheck className="w-4 h-4 text-red-500" />
+                            <span>Admin Portal</span>
+                          </Link>
+                        )}
+                      </div>
+
+                      <div className="border-t border-slate-100 mt-2 pt-2">
+                        <button
+                          onClick={() => {
+                            setDropdownOpen(false);
+                            logout();
+                          }}
+                          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-red-600 hover:bg-red-50 transition-colors"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          <span>Keluar Akun</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <Link
+                    href="/auth/login"
+                    className="traveloka-btn-outline text-xs px-5 py-2"
+                  >
+                    <UserIcon className="w-4 h-4" />
+                    <span>Masuk</span>
+                  </Link>
+
+                  <Link
+                    href="/auth/register"
+                    className="traveloka-btn-orange text-xs px-5 py-2"
+                  >
+                    <span>Daftar Sekarang</span>
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            {/* Mobile Menu Toggle Button */}
+            <div className="flex md:hidden items-center">
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors"
+                aria-label="Toggle menu"
+              >
+                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Mobile Navigation Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-surface-border bg-[#0E1524] px-4 pt-3 pb-6 space-y-3">
-          <Link
-            href="/"
-            onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-base font-medium text-gray-200 hover:bg-surface-hover"
-          >
-            <Compass className="w-5 h-5 text-indigo-400" />
-            Jelajahi Konser
-          </Link>
-
-          {user && (
+        <div className="md:hidden border-b border-slate-200 bg-white px-4 pt-4 pb-6 space-y-4 shadow-lg animate-in slide-in-from-top duration-200">
+          <div className="space-y-1">
             <Link
-              href="/my-tickets"
+              href="/"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-base font-medium text-gray-200 hover:bg-surface-hover"
+              className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-bold text-slate-800 hover:bg-traveloka-sky hover:text-traveloka-blue"
             >
-              <Ticket className="w-5 h-5 text-indigo-400" />
-              Tiket Saya
+              <Music2 className="w-4 h-4 text-traveloka-blue" />
+              <span>Jelajahi Konser</span>
             </Link>
-          )}
 
-          {user && (user.role === 'ORGANIZER' || user.role === 'ADMIN') && (
-            <Link
-              href="/dashboard/organizer"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-base font-medium text-gray-200 hover:bg-surface-hover"
-            >
-              <LayoutDashboard className="w-5 h-5 text-purple-400" />
-              Dashboard Organizer
-            </Link>
-          )}
+            {/* USER ONLY: Tiket Saya */}
+            {user && user.role === 'USER' && (
+              <Link
+                href="/my-tickets"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-bold text-slate-800 hover:bg-traveloka-sky hover:text-traveloka-blue"
+              >
+                <Ticket className="w-4 h-4 text-traveloka-blue" />
+                <span>Tiket Saya</span>
+              </Link>
+            )}
 
-          {user && user.role === 'ADMIN' && (
-            <Link
-              href="/dashboard/admin"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-base font-medium text-gray-200 hover:bg-surface-hover"
-            >
-              <ShieldCheck className="w-5 h-5 text-pink-400" />
-              Admin Panel
-            </Link>
-          )}
+            {/* ORGANIZER ONLY: Dashboard Organizer */}
+            {user && user.role === 'ORGANIZER' && (
+              <Link
+                href="/dashboard/organizer"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-bold text-purple-700 bg-purple-50"
+              >
+                <LayoutDashboard className="w-4 h-4 text-purple-600" />
+                <span>Dashboard Mitra Organizer</span>
+              </Link>
+            )}
 
-          <div className="border-t border-surface-border pt-3">
+            {/* ADMIN ONLY: Admin Portal */}
+            {user && user.role === 'ADMIN' && (
+              <Link
+                href="/dashboard/admin"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-bold text-red-600 bg-red-50"
+              >
+                <ShieldCheck className="w-4 h-4 text-red-600" />
+                <span>Admin Portal</span>
+              </Link>
+            )}
+          </div>
+
+          <div className="border-t border-slate-100 pt-4">
             {token && user ? (
-              <div className="space-y-2">
-                <div className="px-3 py-2 rounded-lg bg-surface-card text-xs text-gray-300">
-                  <p className="font-semibold text-white">{user.name}</p>
-                  <p className="text-gray-400 truncate">{user.email}</p>
+              <div className="space-y-3">
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                  <p className="font-bold text-sm text-slate-900">{user.name}</p>
+                  <p className="text-xs text-slate-500 truncate">{user.email}</p>
+                  <span className={`inline-block mt-1 px-2 py-0.5 text-[10px] font-bold rounded-full ${
+                    user.role === 'ADMIN' 
+                      ? 'bg-red-100 text-red-700' 
+                      : user.role === 'ORGANIZER' 
+                      ? 'bg-purple-100 text-purple-700' 
+                      : 'bg-traveloka-sky text-traveloka-blue'
+                  }`}>
+                    Role: {user.role}
+                  </span>
                 </div>
                 <button
                   onClick={() => {
                     setMobileMenuOpen(false);
                     logout();
                   }}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-red-900/30 text-red-400 font-medium hover:bg-red-900/50"
+                  className="w-full py-2.5 rounded-xl bg-red-50 text-red-600 font-bold text-xs flex items-center justify-center gap-2 hover:bg-red-100 transition-colors"
                 >
                   <LogOut className="w-4 h-4" />
-                  Keluar Akun
+                  <span>Keluar Akun</span>
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2.5">
                 <Link
                   href="/auth/login"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-center px-4 py-2.5 rounded-xl bg-surface-card text-white text-sm font-medium"
+                  className="traveloka-btn-outline text-xs text-center py-2.5"
                 >
                   Masuk
                 </Link>
                 <Link
                   href="/auth/register"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-center px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-medium"
+                  className="traveloka-btn-orange text-xs text-center py-2.5"
                 >
                   Daftar
                 </Link>
@@ -301,7 +383,7 @@ export const Navbar: React.FC = () => {
           </div>
         </div>
       )}
-    </nav>
+    </header>
   );
 };
 

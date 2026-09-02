@@ -17,7 +17,12 @@ import {
   Check, 
   Building2,
   Users,
-  CreditCard
+  CreditCard,
+  ChevronRight,
+  Info,
+  Sparkles,
+  CheckCircle2,
+  Shield
 } from 'lucide-react';
 import api from '@/lib/axios';
 import { Event, TicketTier } from '@/types';
@@ -36,6 +41,7 @@ export default function EventDetailPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<'desc' | 'terms' | 'organizer'>('desc');
 
   useEffect(() => {
     const fetchEventDetail = async () => {
@@ -82,27 +88,27 @@ export default function EventDetailPage() {
   if (isLoading) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-4">
-        <Loader2 className="w-10 h-10 animate-spin text-indigo-500" />
-        <p className="text-sm text-gray-400">Memuat detail konser...</p>
+        <Loader2 className="w-10 h-10 animate-spin text-traveloka-blue" />
+        <p className="text-xs font-bold text-slate-500">Memuat detail konser...</p>
       </div>
     );
   }
 
   if (error || !event) {
     return (
-      <div className="py-16 text-center space-y-4 max-w-md mx-auto">
-        <div className="w-16 h-16 rounded-2xl bg-red-950/50 border border-red-800/40 mx-auto flex items-center justify-center text-red-400">
-          <AlertCircle className="w-8 h-8" />
+      <div className="max-w-4xl mx-auto px-4 py-16 text-center space-y-4">
+        <div className="bg-white rounded-3xl p-10 max-w-md mx-auto space-y-4 border border-slate-200 shadow-sm">
+          <AlertCircle className="w-10 h-10 text-rose-500 mx-auto" />
+          <h2 className="text-xl font-bold text-slate-900">Konser Tidak Ditemukan</h2>
+          <p className="text-xs text-slate-500">{error || 'Konser yang kamu cari tidak tersedia.'}</p>
+          <Link
+            href="/"
+            className="traveloka-btn-outline text-xs py-2 px-5 inline-flex items-center gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Kembali ke Beranda</span>
+          </Link>
         </div>
-        <h2 className="text-xl font-bold text-white">Konser Tidak Ditemukan</h2>
-        <p className="text-xs text-gray-400">{error || 'Konser yang kamu cari tidak tersedia.'}</p>
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Kembali ke Beranda
-        </Link>
       </div>
     );
   }
@@ -115,35 +121,52 @@ export default function EventDetailPage() {
   const bannerSrc = getImageUrl(event.bannerUrl);
 
   return (
-    <div className="space-y-8 py-4">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       
-      {/* Back button & Action bar */}
-      <div className="flex items-center justify-between">
-        <button
-          onClick={() => router.back()}
-          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-surface-card hover:bg-surface-hover border border-surface-border text-xs font-medium text-gray-300 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Kembali
-        </button>
+      {/* 1. Breadcrumbs Navigation (Traveloka Style) */}
+      <div className="flex items-center justify-between flex-wrap gap-4 text-xs">
+        <div className="flex items-center gap-2 text-slate-500 font-medium">
+          <Link href="/" className="hover:text-traveloka-blue transition-colors">
+            Beranda
+          </Link>
+          <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+          <Link href="/" className="hover:text-traveloka-blue transition-colors">
+            Tiket Konser Musik
+          </Link>
+          <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+          <span className="text-slate-800 font-bold truncate max-w-[200px] sm:max-w-none">
+            {event.title}
+          </span>
+        </div>
 
-        <button
-          onClick={handleShare}
-          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-surface-card hover:bg-surface-hover border border-surface-border text-xs font-medium text-gray-300 transition-colors"
-        >
-          {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Share2 className="w-4 h-4" />}
-          <span>{copied ? 'Tautan Disalin!' : 'Bagikan'}</span>
-        </button>
+        {/* Action buttons */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => router.back()}
+            className="traveloka-btn-outline text-xs py-1.5 px-3.5"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 mr-1" />
+            <span>Kembali</span>
+          </button>
+
+          <button
+            onClick={handleShare}
+            className="traveloka-btn-outline text-xs py-1.5 px-3.5"
+          >
+            {copied ? <Check className="w-3.5 h-3.5 text-emerald-600 mr-1" /> : <Share2 className="w-3.5 h-3.5 mr-1" />}
+            <span>{copied ? 'Tautan Disalin!' : 'Bagikan'}</span>
+          </button>
+        </div>
       </div>
 
-      {/* Main Grid: Left details & Right sticky checkout box */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* 2. Main Grid: Left Details & Right Sticky Booking Box */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
-        {/* Left Column: Banner & Info (2 cols) */}
-        <div className="lg:col-span-2 space-y-6">
+        {/* Left Column (8 Cols) */}
+        <div className="lg:col-span-8 space-y-6">
           
-          {/* Banner Image */}
-          <div className="relative w-full h-72 sm:h-96 rounded-3xl overflow-hidden glass-panel border border-surface-border">
+          {/* Photograph Banner */}
+          <div className="relative w-full h-72 sm:h-[400px] bg-slate-100 rounded-3xl overflow-hidden shadow-card border border-slate-200">
             <Image
               src={bannerSrc}
               alt={event.title}
@@ -152,36 +175,42 @@ export default function EventDetailPage() {
               className="object-cover object-center"
               unoptimized={bannerSrc.startsWith('http')}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0B0F19] via-transparent to-transparent" />
             
-            <div className="absolute top-4 left-4">
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-indigo-600/90 text-white backdrop-blur-md shadow-glow">
+            <div className="absolute top-4 left-4 flex items-center gap-2">
+              <span className="px-3 py-1 rounded-full bg-traveloka-blue text-white text-xs font-bold shadow-sm">
+                Official Concert
+              </span>
+              <span className="px-3 py-1 rounded-full bg-white/90 backdrop-blur-md text-slate-800 text-xs font-bold shadow-sm">
                 {event.status}
               </span>
             </div>
           </div>
 
-          {/* Title & Metadata */}
-          <div className="space-y-4">
-            <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+          {/* Title & Metadata Card */}
+          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-card space-y-4">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 leading-snug">
               {event.title}
             </h1>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-              <div className="p-4 rounded-2xl bg-surface-card border border-surface-border flex items-start gap-3">
-                <Calendar className="w-5 h-5 text-indigo-400 mt-0.5 flex-shrink-0" />
+              <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                <div className="w-9 h-9 rounded-xl bg-traveloka-sky text-traveloka-blue flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Calendar className="w-4 h-4" />
+                </div>
                 <div>
-                  <p className="text-[11px] text-gray-400 font-semibold uppercase">Waktu Mulai</p>
-                  <p className="text-xs font-bold text-white mt-0.5">{formatDate(event.startDate)}</p>
-                  <p className="text-[10px] text-gray-400 mt-1">Selesai: {formatDate(event.endDate)}</p>
+                  <span className="text-[11px] font-bold uppercase text-slate-400 block">Jadwal Konser</span>
+                  <p className="text-xs font-bold text-slate-800">{formatDate(event.startDate)}</p>
+                  <p className="text-[11px] text-slate-500">S/d: {formatDate(event.endDate)}</p>
                 </div>
               </div>
 
-              <div className="p-4 rounded-2xl bg-surface-card border border-surface-border flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-pink-400 mt-0.5 flex-shrink-0" />
+              <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                <div className="w-9 h-9 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <MapPin className="w-4 h-4" />
+                </div>
                 <div>
-                  <p className="text-[11px] text-gray-400 font-semibold uppercase">Lokasi Konser</p>
-                  <p className="text-xs font-bold text-white mt-0.5">{event.location}</p>
+                  <span className="text-[11px] font-bold uppercase text-slate-400 block">Lokasi & Venue</span>
+                  <p className="text-xs font-bold text-slate-800 line-clamp-2">{event.location}</p>
                 </div>
               </div>
             </div>
@@ -189,51 +218,93 @@ export default function EventDetailPage() {
 
           {/* Organizer Card */}
           {event.organizer && (
-            <div className="p-5 rounded-2xl glass-card border border-surface-border flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white font-black text-lg shadow-glow">
+            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-card flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-traveloka-blue to-traveloka-navy text-white flex items-center justify-center font-bold text-lg shadow-sm">
                   {event.organizer.name.charAt(0)}
                 </div>
                 <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-400">Penyelenggara</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[11px] font-bold uppercase text-slate-400">Penyelenggara Resmi</span>
                     {event.organizer.isVerified && (
-                      <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 font-bold bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-800/40">
-                        <ShieldCheck className="w-3 h-3" /> Official Organizer
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
+                        <CheckCircle2 className="w-3 h-3" /> Promotor Terverifikasi
                       </span>
                     )}
                   </div>
-                  <h4 className="text-sm font-bold text-white">{event.organizer.organizationName || event.organizer.name}</h4>
+                  <h4 className="text-base font-bold text-slate-900">
+                    {event.organizer.organizationName || event.organizer.name}
+                  </h4>
                   {event.organizer.bio && (
-                    <p className="text-[11px] text-gray-400 mt-0.5">{event.organizer.bio}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">{event.organizer.bio}</p>
                   )}
                 </div>
               </div>
             </div>
           )}
 
-          {/* Event Description */}
-          <div className="space-y-3 p-6 rounded-3xl bg-surface-card border border-surface-border">
-            <h3 className="text-base font-bold text-white">Deskripsi & Rundown Acara</h3>
-            <div className="text-xs sm:text-sm text-gray-300 whitespace-pre-line leading-relaxed">
-              {event.description}
+          {/* Content Tabs (Traveloka Style) */}
+          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-card space-y-5">
+            <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
+              <button
+                type="button"
+                onClick={() => setActiveTab('desc')}
+                className={`text-xs font-bold pb-2 border-b-2 transition-all ${
+                  activeTab === 'desc'
+                    ? 'border-traveloka-blue text-traveloka-blue'
+                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                Tentang Acara & Rundown
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab('terms')}
+                className={`text-xs font-bold pb-2 border-b-2 transition-all ${
+                  activeTab === 'terms'
+                    ? 'border-traveloka-blue text-traveloka-blue'
+                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                Syarat & Ketentuan Masuk
+              </button>
             </div>
+
+            {activeTab === 'desc' ? (
+              <div className="text-xs sm:text-sm text-slate-700 whitespace-pre-line leading-relaxed">
+                {event.description}
+              </div>
+            ) : (
+              <div className="space-y-3 text-xs text-slate-600 leading-relaxed">
+                <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-amber-900 font-medium flex items-start gap-2">
+                  <Info className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                  <span>Harap tunjukkan e-tiket dengan QR Code yang valid saat memasuki area gate panggung konser.</span>
+                </div>
+                <ul className="list-disc pl-5 space-y-1.5">
+                  <li>E-tiket yang sah hanya berlaku untuk 1 orang per barcode pemindaian.</li>
+                  <li>Pengunjung wajib membawa kartu identitas (KTP/SIM/Paspor) yang sesuai dengan nama akun pemesan.</li>
+                  <li>Dilarang membawa senjata tajam, minuman keras, zat terlarang, dan kamera profesional (DSLR) tanpa izin promotor.</li>
+                  <li>Tiket yang telah dibeli tidak dapat ditukar atau diuangkan kembali kecuali konser dibatalkan oleh promotor.</li>
+                </ul>
+              </div>
+            )}
           </div>
 
         </div>
 
-        {/* Right Column: Ticket Tier Selection & Buy (1 col) */}
-        <div className="space-y-6">
-          <div className="sticky top-28 p-6 rounded-3xl glass-card border border-indigo-500/30 shadow-2xl space-y-6">
+        {/* Right Column: Sticky Ticket Booking Box (4 Cols) */}
+        <div className="lg:col-span-4">
+          <div className="sticky top-28 bg-white rounded-3xl p-6 border border-slate-200 shadow-floating space-y-5">
             
-            <div>
-              <span className="text-xs text-gray-400 block font-medium">Pilihan Tiket</span>
-              <h3 className="text-lg font-bold text-white mt-1">Pilih Kategori Tiket</h3>
+            <div className="border-b border-slate-100 pb-3">
+              <span className="text-[11px] font-bold uppercase text-slate-400 block">Pilihan Kategori</span>
+              <h3 className="text-lg font-bold text-slate-900 mt-0.5">Pilih Kategori Tiket</h3>
             </div>
 
-            {/* Ticket Tiers List */}
+            {/* Ticket Tier List */}
             {event.ticketTiers && event.ticketTiers.length > 0 ? (
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 {event.ticketTiers.map((tier) => {
                   const isSelected = selectedTier?.id === tier.id;
                   const remaining = tier.quota - (tier.soldQuota || 0);
@@ -243,26 +314,26 @@ export default function EventDetailPage() {
                     <div
                       key={tier.id}
                       onClick={() => !isSoldOut && setSelectedTier(tier)}
-                      className={`p-4 rounded-2xl border transition-all cursor-pointer ${
+                      className={`p-3.5 rounded-2xl border-2 transition-all cursor-pointer ${
                         isSelected
-                          ? 'bg-indigo-600/20 border-indigo-500 shadow-glow'
+                          ? 'border-traveloka-blue bg-traveloka-sky/30 shadow-sm'
                           : isSoldOut
-                          ? 'bg-surface-input/50 border-surface-border opacity-50 cursor-not-allowed'
-                          : 'bg-surface-input border-surface-border hover:border-indigo-500/40'
+                          ? 'border-slate-100 bg-slate-50 opacity-50 cursor-not-allowed'
+                          : 'border-slate-200 bg-white hover:border-slate-300'
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-bold text-white">{tier.name}</p>
-                          <p className="text-xs text-indigo-400 font-extrabold mt-0.5">{formatIDR(tier.price)}</p>
+                          <p className="text-xs font-bold text-slate-900 uppercase">{tier.name}</p>
+                          <p className="text-sm font-extrabold text-traveloka-orange mt-0.5">{formatIDR(tier.price)}</p>
                         </div>
                         <div className="text-right">
-                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${
                             isSoldOut
-                              ? 'bg-red-950/60 text-red-400 border border-red-800/40'
-                              : 'bg-emerald-950/60 text-emerald-400 border border-emerald-800/40'
+                              ? 'bg-rose-100 text-rose-600'
+                              : 'bg-emerald-100 text-emerald-700'
                           }`}>
-                            {isSoldOut ? 'Habis' : `Sisa ${remaining}`}
+                            {isSoldOut ? 'HABIS' : `SISA ${remaining}`}
                           </span>
                         </div>
                       </div>
@@ -271,13 +342,13 @@ export default function EventDetailPage() {
                 })}
               </div>
             ) : (
-              <div className="p-4 rounded-2xl bg-surface-input border border-surface-border">
+              <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-bold text-white">Tiket Standar</p>
-                    <p className="text-xs text-indigo-400 font-extrabold mt-0.5">{formatIDR(event.price)}</p>
+                    <p className="text-xs font-bold text-slate-900 uppercase">Tiket Standar</p>
+                    <p className="text-sm font-extrabold text-traveloka-orange mt-0.5">{formatIDR(event.price)}</p>
                   </div>
-                  <span className="text-[10px] text-emerald-400 font-semibold px-2 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-800/40">
+                  <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold">
                     Sisa {event.quota}
                   </span>
                 </div>
@@ -285,35 +356,35 @@ export default function EventDetailPage() {
             )}
 
             {/* Quantity Selector */}
-            <div className="space-y-2 pt-2 border-t border-surface-border">
+            <div className="space-y-2 pt-2 border-t border-slate-100">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-300 font-medium">Jumlah Tiket</span>
-                <div className="flex items-center gap-3">
+                <span className="text-xs font-bold text-slate-800">Jumlah Tiket</span>
+                <div className="flex items-center border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
                   <button
                     type="button"
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-8 h-8 rounded-lg bg-surface-input border border-surface-border text-white text-sm font-bold flex items-center justify-center hover:bg-surface-hover active:scale-95"
+                    className="w-8 h-8 hover:bg-slate-200 text-slate-800 font-bold flex items-center justify-center transition-colors"
                   >
                     -
                   </button>
-                  <span className="text-sm font-bold text-white w-6 text-center">{quantity}</span>
+                  <span className="font-bold text-xs text-slate-900 w-8 text-center">{quantity}</span>
                   <button
                     type="button"
                     onClick={() => setQuantity(Math.min(5, Math.min(currentAvailableQuota, quantity + 1)))}
-                    className="w-8 h-8 rounded-lg bg-surface-input border border-surface-border text-white text-sm font-bold flex items-center justify-center hover:bg-surface-hover active:scale-95"
+                    className="w-8 h-8 hover:bg-slate-200 text-slate-800 font-bold flex items-center justify-center transition-colors"
                   >
                     +
                   </button>
                 </div>
               </div>
-              <p className="text-[10px] text-gray-500 text-right">Maksimal 5 tiket per transaksi</p>
+              <p className="text-[11px] text-slate-400 text-right font-medium">Maks. 5 tiket per transaksi</p>
             </div>
 
             {/* Total Price & Checkout button */}
-            <div className="space-y-4 pt-4 border-t border-surface-border">
+            <div className="space-y-3 pt-3 border-t border-slate-100">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-400">Total Pembayaran</span>
-                <span className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-purple-300 to-pink-300">
+                <span className="text-xs font-semibold text-slate-500">Total Harga</span>
+                <span className="text-xl font-black text-traveloka-orange tracking-tight">
                   {formatIDR(currentPrice * quantity)}
                 </span>
               </div>
@@ -322,16 +393,17 @@ export default function EventDetailPage() {
                 type="button"
                 onClick={handleCheckout}
                 disabled={currentAvailableQuota <= 0}
-                className="w-full py-4 px-4 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:shadow-glow text-white text-sm font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
+                className="w-full traveloka-btn-orange py-3.5 text-sm font-bold shadow-md hover:shadow-lg disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <Ticket className="w-4 h-4" />
-                <span>{currentAvailableQuota <= 0 ? 'Tiket Habis' : 'Beli Tiket Sekarang'}</span>
+                <span>{currentAvailableQuota <= 0 ? 'Tiket Telah Habis' : 'Pesan Tiket Sekarang'}</span>
               </button>
             </div>
 
-            <div className="flex items-center justify-center gap-2 text-[10px] text-gray-400 pt-1">
-              <CreditCard className="w-3.5 h-3.5 text-indigo-400" />
-              <span>Pembayaran via Transfer Bank & E-Wallet</span>
+            {/* Security Note */}
+            <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-400 font-medium pt-1">
+              <Shield className="w-3.5 h-3.5 text-emerald-500" />
+              <span>Garansi 100% Pembayaran Aman</span>
             </div>
 
           </div>

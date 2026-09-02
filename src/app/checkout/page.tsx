@@ -13,12 +13,16 @@ import {
   Copy, 
   Check, 
   Loader2, 
-  ShieldCheck, 
   Ticket, 
   Calendar, 
   MapPin,
   Building2,
-  Wallet
+  Lock,
+  ChevronRight,
+  ShieldCheck,
+  User as UserIcon,
+  Phone,
+  Mail
 } from 'lucide-react';
 import api from '@/lib/axios';
 import { Event, PaymentMethod, TicketTier, Registration } from '@/types';
@@ -120,7 +124,7 @@ function CheckoutContent() {
     if (!eventId) return;
 
     if (!proofFile) {
-      setErrorMessage('Silakan unggah foto/screenshot bukti transfer terlebih dahulu.');
+      setErrorMessage('Silakan unggah foto atau screenshot bukti transfer pembayaran.');
       return;
     }
 
@@ -128,12 +132,16 @@ function CheckoutContent() {
     setErrorMessage(null);
 
     try {
+      const unitPrice = selectedTier ? selectedTier.price : (event ? event.price : 0);
+      const calculatedTotal = unitPrice * quantity;
+
       const formData = new FormData();
       formData.append('eventId', eventId);
       if (tierId) {
         formData.append('ticketTierId', tierId);
       }
       formData.append('quantity', String(quantity));
+      formData.append('totalPrice', String(calculatedTotal));
       if (selectedMethodId) {
         formData.append('paymentMethodId', selectedMethodId);
       }
@@ -148,7 +156,7 @@ function CheckoutContent() {
       setSuccessOrder(response.data);
     } catch (err: any) {
       console.error('Order submission error:', err);
-      const msg = err.response?.data?.message || 'Gagal mengirim pesanan. Silakan coba kembali.';
+      const msg = err.response?.data?.message || 'Gagal mengirim pesanan. Silakan periksa file bukti transfer Anda.';
       setErrorMessage(typeof msg === 'string' ? msg : JSON.stringify(msg));
     } finally {
       setIsSubmitting(false);
@@ -158,66 +166,74 @@ function CheckoutContent() {
   if (isLoading) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-4">
-        <Loader2 className="w-10 h-10 animate-spin text-indigo-500" />
-        <p className="text-sm text-gray-400">Menyiapkan halaman pembayaran...</p>
+        <Loader2 className="w-10 h-10 animate-spin text-traveloka-blue" />
+        <p className="text-xs font-bold text-slate-500">Menyiapkan lembar pembayaran aman...</p>
       </div>
     );
   }
 
+  // 1. Success Screen (Traveloka E-Receipt Style)
   if (successOrder) {
     return (
-      <div className="max-w-xl mx-auto py-12 px-4 space-y-8">
-        <div className="p-8 rounded-3xl glass-card border border-emerald-500/40 text-center space-y-6 shadow-2xl">
-          <div className="w-20 h-20 rounded-full bg-emerald-500/20 border border-emerald-400/40 mx-auto flex items-center justify-center">
-            <CheckCircle2 className="w-10 h-10 text-emerald-400" />
+      <div className="max-w-xl mx-auto py-12 px-4 space-y-6">
+        <div className="bg-white rounded-3xl p-8 sm:p-10 text-center space-y-6 border border-slate-200 shadow-floating">
+          
+          <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center">
+            <CheckCircle2 className="w-10 h-10" />
           </div>
 
           <div className="space-y-2">
-            <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-950 text-emerald-300 border border-emerald-800/60">
-              Pesanan Berhasil Dikirim
+            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">
+              Pembayaran Terkirim
             </span>
-            <h2 className="text-2xl font-extrabold text-white">Terima Kasih Atas Pemesananmu!</h2>
-            <p className="text-xs text-gray-400">
-              Bukti pembayaran telah kami terima. Organizer akan memverifikasi pembayaran Anda segera.
+            <h2 className="text-2xl font-extrabold text-slate-900">
+              Pemesanan Berhasil Dikirim!
+            </h2>
+            <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
+              Bukti transfer pembayaran Anda telah diterima. Penyelenggara akan segera memverifikasi pesanan Anda.
             </p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-surface-input border border-surface-border text-left space-y-3">
+          {/* Receipt Summary Card */}
+          <div className="bg-slate-50 rounded-2xl p-5 text-left space-y-3 border border-slate-200/80">
             <div className="flex justify-between items-center text-xs">
-              <span className="text-gray-400">Kode Tiket</span>
-              <span className="font-mono font-bold text-indigo-400 text-sm">{successOrder.ticketCode}</span>
+              <span className="font-semibold text-slate-500">Kode Pemesanan</span>
+              <span className="font-mono font-bold text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-200">
+                {successOrder.ticketCode}
+              </span>
             </div>
-            <div className="flex justify-between items-center text-xs border-t border-surface-border/60 pt-2">
-              <span className="text-gray-400">Konser</span>
-              <span className="font-semibold text-white truncate max-w-[200px]">{event?.title}</span>
+            <div className="flex justify-between items-center text-xs border-t border-slate-200/60 pt-2">
+              <span className="font-semibold text-slate-500">Konser</span>
+              <span className="font-bold text-slate-900 truncate max-w-[200px]">{event?.title}</span>
             </div>
-            <div className="flex justify-between items-center text-xs border-t border-surface-border/60 pt-2">
-              <span className="text-gray-400">Status Pembayaran</span>
-              <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">
+            <div className="flex justify-between items-center text-xs border-t border-slate-200/60 pt-2">
+              <span className="font-semibold text-slate-500">Status</span>
+              <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold">
                 {successOrder.status}
               </span>
             </div>
-            <div className="flex justify-between items-center text-xs border-t border-surface-border/60 pt-2">
-              <span className="text-gray-400">Total Biaya</span>
-              <span className="font-bold text-white text-sm">{formatIDR(successOrder.totalPrice)}</span>
+            <div className="flex justify-between items-center text-xs border-t border-slate-200/60 pt-2">
+              <span className="font-semibold text-slate-500">Total Pembayaran</span>
+              <span className="font-extrabold text-sm text-traveloka-orange">{formatIDR(successOrder.totalPrice)}</span>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3 pt-2">
             <Link
               href="/my-tickets"
-              className="py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-glow"
+              className="traveloka-btn-blue text-xs py-3"
             >
               <Ticket className="w-4 h-4" />
-              Lihat Tiket Saya
+              <span>Lihat Tiket Saya</span>
             </Link>
             <Link
               href="/"
-              className="py-3 px-4 rounded-xl bg-surface-card hover:bg-surface-hover border border-surface-border text-gray-300 text-xs font-semibold flex items-center justify-center gap-2"
+              className="traveloka-btn-outline text-xs py-3"
             >
-              Kembali ke Beranda
+              <span>Ke Beranda</span>
             </Link>
           </div>
+
         </div>
       </div>
     );
@@ -225,78 +241,131 @@ function CheckoutContent() {
 
   if (!event) {
     return (
-      <div className="py-16 text-center space-y-4">
-        <p className="text-gray-400">Data konser tidak ditemukan.</p>
-        <Link href="/" className="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs">Kembali</Link>
+      <div className="max-w-4xl mx-auto px-4 py-16 text-center space-y-4">
+        <p className="text-sm text-slate-500">Data konser tidak ditemukan.</p>
+        <Link href="/" className="traveloka-btn-outline text-xs py-2 px-4">Kembali</Link>
       </div>
     );
   }
 
   const unitPrice = selectedTier ? selectedTier.price : event.price;
   const totalPrice = unitPrice * quantity;
+  const bannerSrc = getImageUrl(event.bannerUrl);
 
   return (
-    <div className="space-y-8 py-4">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <button
-          onClick={() => router.back()}
-          className="p-2 rounded-xl bg-surface-card border border-surface-border text-gray-400 hover:text-white"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <div>
-          <h1 className="text-2xl font-extrabold text-white">Konfirmasi & Pembayaran</h1>
-          <p className="text-xs text-gray-400">Selesaikan pembayaran untuk mengamankan tiket konsermu</p>
+      {/* 1. Header & Step Bar (Traveloka Style) */}
+      <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-card flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => router.back()}
+            className="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 transition-colors"
+            aria-label="Kembali"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+          <div>
+            <h1 className="text-xl font-extrabold text-slate-900">Pembayaran & Konfirmasi Tiket</h1>
+            <p className="text-xs text-slate-500">Lakukan pembayaran untuk mengamankan kuota tiket konsermu</p>
+          </div>
+        </div>
+
+        {/* Steps indicator */}
+        <div className="flex items-center gap-2 text-xs font-bold">
+          <span className="w-6 h-6 rounded-full bg-traveloka-blue text-white flex items-center justify-center text-[11px]">1</span>
+          <span className="text-traveloka-blue">Data & Pembayaran</span>
+          <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+          <span className="w-6 h-6 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center text-[11px]">2</span>
+          <span className="text-slate-400">Verifikasi & E-Tiket</span>
         </div>
       </div>
 
       {errorMessage && (
-        <div className="p-4 rounded-2xl bg-red-950/40 border border-red-800/50 flex items-start gap-3 text-red-300 text-xs">
-          <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
-          <span>{errorMessage}</span>
+        <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-rose-500 flex-shrink-0 mt-0.5" />
+          <span className="text-xs font-bold text-rose-800">{errorMessage}</span>
         </div>
       )}
 
-      <form onSubmit={handleSubmitOrder} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <form onSubmit={handleSubmitOrder} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
-        {/* Left Column: Payment Methods & Upload Proof (2 cols) */}
-        <div className="lg:col-span-2 space-y-6">
+        {/* Left Column (8 cols) */}
+        <div className="lg:col-span-8 space-y-6">
           
-          {/* 1. Pilih Rekening Transfer */}
-          <div className="p-6 rounded-3xl glass-card border border-surface-border space-y-4">
-            <div className="flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-indigo-400" />
-              <h3 className="text-base font-bold text-white">1. Pilih Rekening / E-Wallet Tujuan Transfer</h3>
+          {/* Step 1: Data Pemesan */}
+          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-card space-y-4">
+            <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+              <span className="w-6 h-6 rounded-full bg-traveloka-blue text-white flex items-center justify-center font-bold text-xs">
+                1
+              </span>
+              <h3 className="text-sm font-bold text-slate-900">
+                DATA PEMESAN TIKET
+              </h3>
             </div>
-            <p className="text-xs text-gray-400">
-              Transfer total nominal ke salah satu rekening resmi penyelenggara konser di bawah ini:
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
+                <span className="text-[11px] font-bold text-slate-400 flex items-center gap-1">
+                  <UserIcon className="w-3 h-3" /> Nama Lengkap
+                </span>
+                <p className="font-bold text-slate-900 truncate">{user?.name}</p>
+              </div>
+
+              <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
+                <span className="text-[11px] font-bold text-slate-400 flex items-center gap-1">
+                  <Mail className="w-3 h-3" /> Email
+                </span>
+                <p className="font-bold text-slate-900 truncate">{user?.email}</p>
+              </div>
+
+              <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
+                <span className="text-[11px] font-bold text-slate-400 flex items-center gap-1">
+                  <Phone className="w-3 h-3" /> No. Telepon
+                </span>
+                <p className="font-bold text-slate-900 truncate">{user?.phoneNumber || '-'}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Step 2: Rekening Transfer Penyelenggara */}
+          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-card space-y-4">
+            <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+              <span className="w-6 h-6 rounded-full bg-traveloka-blue text-white flex items-center justify-center font-bold text-xs">
+                2
+              </span>
+              <h3 className="text-sm font-bold text-slate-900">
+                PILIH REKENING TUJUAN TRANSFER PENYELENGGARA
+              </h3>
+            </div>
+            
+            <p className="text-xs text-slate-500">
+              Transfer nominal sesuai total biaya ke rekening resmi penyelenggara konser di bawah ini:
             </p>
 
             {paymentMethods.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                 {paymentMethods.map((pm, idx) => {
                   const isSelected = selectedMethodId === pm.id;
                   return (
                     <div
                       key={pm.id}
                       onClick={() => setSelectedMethodId(pm.id)}
-                      className={`p-4 rounded-2xl border transition-all cursor-pointer ${
+                      className={`p-4 rounded-2xl border-2 transition-all cursor-pointer ${
                         isSelected
-                          ? 'bg-indigo-600/20 border-indigo-500 shadow-glow'
-                          : 'bg-surface-input border-surface-border hover:border-indigo-500/40'
+                          ? 'border-traveloka-blue bg-traveloka-sky/30 shadow-sm'
+                          : 'border-slate-200 bg-white hover:border-slate-300'
                       }`}
                     >
-                      <div className="flex justify-between items-start">
-                        <span className="text-xs font-bold text-white uppercase">{pm.bankName}</span>
-                        <span className="text-[10px] px-2 py-0.5 rounded bg-surface-card border border-surface-border text-gray-400">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-bold text-slate-900 uppercase">{pm.bankName}</span>
+                        <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold">
                           {pm.type}
                         </span>
                       </div>
                       
-                      <div className="mt-3 flex items-center justify-between bg-black/40 p-2.5 rounded-xl">
-                        <span className="font-mono text-sm font-bold text-indigo-300 tracking-wider">
+                      <div className="mt-2.5 flex items-center justify-between bg-white border border-slate-200 rounded-xl p-2.5">
+                        <span className="font-mono text-sm font-extrabold text-slate-900 tracking-wider">
                           {pm.accountNumber}
                         </span>
                         <button
@@ -305,41 +374,46 @@ function CheckoutContent() {
                             e.stopPropagation();
                             handleCopyAccount(pm.accountNumber, idx);
                           }}
-                          className="p-1 rounded text-gray-400 hover:text-white"
-                          title="Salin Nomor"
+                          className="p-1 rounded-lg hover:bg-slate-100 text-slate-600 hover:text-traveloka-blue transition-colors"
+                          title="Salin Nomor Rekening"
                         >
-                          {copiedIndex === idx ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                          {copiedIndex === idx ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
                         </button>
                       </div>
 
-                      <p className="text-[11px] text-gray-400 mt-2">
-                        a/n <strong className="text-gray-200">{pm.accountHolderName}</strong>
+                      <p className="text-[11px] text-slate-500 mt-2">
+                        A/n: <strong className="text-slate-800 uppercase font-bold">{pm.accountHolderName}</strong>
                       </p>
                     </div>
                   );
                 })}
               </div>
             ) : (
-              <div className="p-4 rounded-2xl bg-amber-950/30 border border-amber-800/40 text-xs text-amber-300">
-                Organizer belum mendaftarkan rekening bank secara spesifik. Kamu tetap dapat melanjutkan checkout dan mengunggah bukti transfer.
+              <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-800">
+                Penyelenggara belum mendaftarkan rekening spesifik di sistem. Anda dapat melanjutkan checkout dan mengunggah bukti pembayaran Anda.
               </div>
             )}
           </div>
 
-          {/* 2. Upload Bukti Pembayaran */}
-          <div className="p-6 rounded-3xl glass-card border border-surface-border space-y-4">
-            <div className="flex items-center gap-2">
-              <UploadCloud className="w-5 h-5 text-purple-400" />
-              <h3 className="text-base font-bold text-white">2. Unggah Bukti Pembayaran (Wajib)</h3>
+          {/* Step 3: Upload Bukti Pembayaran */}
+          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-card space-y-4">
+            <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+              <span className="w-6 h-6 rounded-full bg-traveloka-blue text-white flex items-center justify-center font-bold text-xs">
+                3
+              </span>
+              <h3 className="text-sm font-bold text-slate-900">
+                UNGGAH BUKTI TRANSFER PEMBAYARAN (WAJIB)
+              </h3>
             </div>
-            <p className="text-xs text-gray-400">
-              Format: JPG, PNG, atau WEBP. Ukuran maksimal 5MB. Pastikan nominal dan nama pengirim terbaca jelas.
+            
+            <p className="text-xs text-slate-500">
+              Format file: JPG, PNG, atau WEBP (maksimal 5MB). Pastikan tanggal, jam, dan nominal terlihat jelas.
             </p>
 
-            <div className="pt-2">
+            <div className="pt-1">
               <label
                 htmlFor="proof-upload"
-                className="border-2 border-dashed border-surface-border hover:border-indigo-500/60 rounded-3xl p-8 flex flex-col items-center justify-center cursor-pointer bg-surface-input/50 transition-all group"
+                className="border-2 border-dashed border-slate-300 hover:border-traveloka-blue rounded-3xl p-8 flex flex-col items-center justify-center cursor-pointer bg-slate-50/50 hover:bg-traveloka-sky/20 transition-all"
               >
                 <input
                   id="proof-upload"
@@ -350,28 +424,28 @@ function CheckoutContent() {
                 />
 
                 {previewUrl ? (
-                  <div className="space-y-4 text-center">
-                    <div className="relative w-48 h-48 mx-auto rounded-2xl overflow-hidden border border-indigo-500/40 shadow-lg">
+                  <div className="space-y-3 text-center">
+                    <div className="relative w-40 h-40 mx-auto rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
                       <Image
                         src={previewUrl}
-                        alt="Preview Bukti Pembayaran"
+                        alt="Preview Bukti Transfer"
                         fill
                         className="object-cover"
                       />
                     </div>
-                    <p className="text-xs text-emerald-400 font-semibold flex items-center justify-center gap-1.5">
-                      <CheckCircle2 className="w-4 h-4" /> Bukti dipilih: {proofFile?.name}
+                    <p className="text-xs font-bold text-slate-800 flex items-center justify-center gap-1.5">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" /> {proofFile?.name}
                     </p>
-                    <span className="text-[10px] text-gray-400 block underline">Klik untuk mengganti gambar</span>
+                    <span className="text-xs text-traveloka-blue underline block">Klik untuk mengganti gambar</span>
                   </div>
                 ) : (
-                  <div className="space-y-3 text-center">
-                    <div className="w-14 h-14 rounded-2xl bg-indigo-600/10 border border-indigo-500/30 flex items-center justify-center mx-auto text-indigo-400 group-hover:scale-110 transition-transform">
-                      <UploadCloud className="w-7 h-7" />
+                  <div className="space-y-2 text-center">
+                    <div className="w-12 h-12 rounded-2xl bg-traveloka-sky text-traveloka-blue flex items-center justify-center mx-auto">
+                      <UploadCloud className="w-6 h-6" />
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-white">Klik untuk memilih file bukti transfer</p>
-                      <p className="text-[10px] text-gray-500 mt-1">Mendukung file JPG, PNG, WEBP (Maks 5MB)</p>
+                      <p className="text-xs font-bold text-slate-800">Klik atau seret file bukti transfer ke sini</p>
+                      <p className="text-[11px] text-slate-400 mt-0.5">Format JPG, PNG, WEBP (Maksimal 5MB)</p>
                     </div>
                   </div>
                 )}
@@ -381,47 +455,51 @@ function CheckoutContent() {
 
         </div>
 
-        {/* Right Column: Order Summary (1 col) */}
-        <div className="space-y-6">
-          <div className="p-6 rounded-3xl glass-card border border-surface-border shadow-2xl space-y-6 sticky top-28">
+        {/* Right Column: Order Summary (4 cols, Sticky) */}
+        <div className="lg:col-span-4">
+          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-floating space-y-5 sticky top-28">
             
-            <h3 className="text-base font-bold text-white border-b border-surface-border pb-3">Ringkasan Pesanan</h3>
+            <h3 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
+              Ringkasan Pesanan
+            </h3>
 
-            {/* Event Summary Card */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-extrabold text-white line-clamp-1">{event.title}</h4>
-              
-              <div className="space-y-1.5 text-xs text-gray-400">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-3.5 h-3.5 text-indigo-400" />
+            {/* Mini Event Preview */}
+            <div className="flex gap-3">
+              <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-slate-100 flex-shrink-0 border border-slate-200">
+                <Image
+                  src={bannerSrc}
+                  alt={event.title}
+                  fill
+                  className="object-cover"
+                  unoptimized={bannerSrc.startsWith('http')}
+                />
+              </div>
+              <div className="space-y-1 flex-1">
+                <h4 className="text-xs font-bold text-slate-900 line-clamp-2 leading-snug">{event.title}</h4>
+                <div className="flex items-center gap-1 text-[11px] text-slate-500">
+                  <Calendar className="w-3 h-3 text-traveloka-blue" />
                   <span>{formatDateShort(event.startDate)}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-3.5 h-3.5 text-pink-400" />
-                  <span className="truncate">{event.location}</span>
                 </div>
               </div>
             </div>
 
-            {/* Ticket Tier & Quantity calculation */}
-            <div className="p-4 rounded-2xl bg-surface-input border border-surface-border space-y-2 text-xs">
-              <div className="flex justify-between text-gray-300">
+            {/* Calculations */}
+            <div className="bg-slate-50 rounded-2xl p-4 space-y-2 text-xs border border-slate-100">
+              <div className="flex justify-between text-slate-600">
                 <span>Kategori:</span>
-                <span className="font-bold text-white">{selectedTier ? selectedTier.name : 'Tiket Standar'}</span>
+                <span className="font-bold text-slate-900 uppercase">{selectedTier ? selectedTier.name : 'Tiket Standar'}</span>
               </div>
-              <div className="flex justify-between text-gray-300">
+              <div className="flex justify-between text-slate-600">
                 <span>Harga Satuan:</span>
-                <span>{formatIDR(unitPrice)}</span>
+                <span className="font-semibold text-slate-800">{formatIDR(unitPrice)}</span>
               </div>
-              <div className="flex justify-between text-gray-300">
-                <span>Jumlah:</span>
-                <span className="font-bold">{quantity} Tiket</span>
+              <div className="flex justify-between text-slate-600">
+                <span>Jumlah Tiket:</span>
+                <span className="font-semibold text-slate-800">{quantity} Tiket</span>
               </div>
-              <div className="border-t border-surface-border/60 pt-2 flex justify-between font-bold text-white text-sm">
-                <span>Total Bayar:</span>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-purple-300 to-pink-300">
-                  {formatIDR(totalPrice)}
-                </span>
+              <div className="border-t border-slate-200/80 pt-2 flex justify-between font-extrabold text-slate-900 text-sm">
+                <span>Total Pembayaran:</span>
+                <span className="text-base text-traveloka-orange">{formatIDR(totalPrice)}</span>
               </div>
             </div>
 
@@ -429,24 +507,25 @@ function CheckoutContent() {
             <button
               type="submit"
               disabled={isSubmitting || !proofFile}
-              className="w-full py-4 px-4 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:shadow-glow text-white text-sm font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
+              className="w-full traveloka-btn-orange py-3.5 text-xs font-bold shadow-md hover:shadow-lg disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Mengirim Bukti...</span>
+                  <span>Mengirim Bukti Pembayaran...</span>
                 </>
               ) : (
                 <>
                   <CreditCard className="w-4 h-4" />
-                  <span>Kirim & Konfirmasi Pembayaran</span>
+                  <span>Kirim & Bayar Sekarang</span>
                 </>
               )}
             </button>
 
-            <p className="text-[10px] text-gray-500 text-center leading-relaxed">
-              Dengan mengklik tombol di atas, Anda menyatakan bahwa bukti transfer yang diunggah adalah sah dan benar.
-            </p>
+            <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-400">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+              <span>Transaksi Aman & Terenkripsi</span>
+            </div>
 
           </div>
         </div>
@@ -461,8 +540,8 @@ export default function CheckoutPage() {
   return (
     <Suspense fallback={
       <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-4">
-        <Loader2 className="w-10 h-10 animate-spin text-indigo-500" />
-        <p className="text-sm text-gray-400">Menyiapkan halaman pembayaran...</p>
+        <Loader2 className="w-10 h-10 animate-spin text-traveloka-blue" />
+        <p className="text-xs font-bold text-slate-500">Menyiapkan lembar pembayaran aman...</p>
       </div>
     }>
       <CheckoutContent />
